@@ -104,7 +104,7 @@ class InstantExecutionGroovyIntegrationTest extends AbstractInstantExecutionInte
 
         then:
         instantExecution.assertStateStored()
-        problems.expectWarnings(result) {
+        problems.assertResultHasProblems(result) {
             withUniqueProblems(
                 "field 'groovyClasspath' from type 'org.gradle.api.tasks.compile.GroovyCompile': value 'Groovy runtime classpath' failed to visit file collection"
             )
@@ -138,7 +138,7 @@ class InstantExecutionGroovyIntegrationTest extends AbstractInstantExecutionInte
 
         then:
         instantExecution.assertStateStored()
-        problems.expectWarnings(result) {
+        problems.assertResultHasProblems(result) {
             withUniqueProblems(
                 "field 'groovyClasspath' from type 'org.gradle.api.tasks.compile.GroovyCompile': value 'Groovy runtime classpath' failed to visit file collection"
             )

@@ -670,16 +670,24 @@ class InstantExecutionIntegrationTest extends AbstractInstantExecutionIntegratio
         instantFails "broken"
 
         then:
-        problems.expectWarnings(result) {
+        instantExecution.assertStateStored()
+        problems.assertResultHasProblems(result) {
             withUniqueProblems("field 'value' from type 'SomeTask': $problem")
             withProblemsWithStackTraceCount(1)
         }
+
+        and:
+        failure.assertTasksExecuted(":broken")
+        failure.assertHasDescription("Execution failed for task ':broken'.")
+        failure.assertHasCause("broken!")
 
         when:
         instantFails "broken"
 
         then:
         instantExecution.assertStateLoaded()
+
+        and:
         failure.assertTasksExecuted(":broken")
         failure.assertHasDescription("Execution failed for task ':broken'.")
         failure.assertHasCause("broken!")
