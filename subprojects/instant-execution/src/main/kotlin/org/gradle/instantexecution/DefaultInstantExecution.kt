@@ -142,6 +142,9 @@ class DefaultInstantExecution internal constructor(
             return
         }
 
+        buildScan.instantExecutionEnabled()
+        buildScan.instantExecutionStoreAction()
+
         stopCollectingCacheFingerprint()
 
         buildOperationExecutor.withStoreOperation {
@@ -158,6 +161,9 @@ class DefaultInstantExecution internal constructor(
                 }
 
                 writeInstantExecutionCacheFingerprint()
+
+                buildScan.instantExecutionStateSize(instantExecutionStateFile.length())
+                buildScan.instantExecutionFingerprintSize(instantExecutionFingerprintFile.length())
             }
         }
     }
@@ -200,6 +206,11 @@ class DefaultInstantExecution internal constructor(
         val build = host.createBuild(rootProjectName)
 
         readBuildScanState(buildScan)
+
+        buildScan.instantExecutionEnabled()
+        buildScan.instantExecutionLoadAction()
+        buildScan.instantExecutionStateSize(instantExecutionStateFile.length())
+        buildScan.instantExecutionFingerprintSize(instantExecutionFingerprintFile.length())
 
         readGradleState(build.gradle)
 
