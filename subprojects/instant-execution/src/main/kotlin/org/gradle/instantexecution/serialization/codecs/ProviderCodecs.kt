@@ -67,7 +67,7 @@ class FixedValueReplacingProviderCodec(valueSourceProviderFactory: ValueSourcePr
         } else if (value.isValueProducedByTask) {
             // Cannot write a fixed value, so write the provider itself
             writeBoolean(true)
-            providerWithChangingValueCodec.run { encode(value) }
+            providerWithChangingValueCodec.run { encode(sourceOf(value)) }
         } else {
             // Can serialize a fixed value and discard the provider
             writeBoolean(false)
@@ -84,6 +84,17 @@ class FixedValueReplacingProviderCodec(valueSourceProviderFactory: ValueSourcePr
                 else -> Providers.ofNullable(value)
             }
         }
+    }
+}
+
+
+private
+fun sourceOf(value: Provider<*>): Provider<*> {
+    // Don't serialize simple property instances in a chain of providers, instead replace them with their source provider.
+    return if (value is DefaultProperty<*>) {
+        sourceOf(value.provider)
+    } else {
+        value
     }
 }
 
