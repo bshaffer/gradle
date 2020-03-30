@@ -27,6 +27,7 @@ import org.gradle.api.internal.provider.DefaultProperty
 import org.gradle.api.internal.provider.DefaultProvider
 import org.gradle.api.internal.provider.DefaultSetProperty
 import org.gradle.api.internal.provider.DefaultValueSourceProviderFactory.ValueSourceProvider
+import org.gradle.api.internal.provider.FlatMapProvider
 import org.gradle.api.internal.provider.PropertyFactory
 import org.gradle.api.internal.provider.ProviderInternal
 import org.gradle.api.internal.provider.Providers
@@ -60,7 +61,10 @@ class FixedValueReplacingProviderCodec(valueSourceProviderFactory: ValueSourcePr
     }
 
     override suspend fun WriteContext.encode(value: ProviderInternal<*>) {
-        if (value.isValueProducedByTask) {
+        if (value is FlatMapProvider<*, *>) {
+            // Replace the provider with its backing provider
+            encode(value.backingProvider())
+        } else if (value.isValueProducedByTask) {
             // Cannot write a fixed value, so write the provider itself
             writeBoolean(true)
             providerWithChangingValueCodec.run { encode(value) }
