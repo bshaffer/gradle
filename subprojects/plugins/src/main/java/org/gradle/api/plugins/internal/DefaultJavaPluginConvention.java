@@ -21,11 +21,14 @@ import org.gradle.api.Action;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.internal.file.FileLookup;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.internal.provider.Providers;
 import org.gradle.api.internal.tasks.DefaultSourceSetContainer;
 import org.gradle.api.java.archives.Manifest;
 import org.gradle.api.java.archives.internal.DefaultManifest;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.JavaPluginConvention;
+import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.reporting.ReportingExtension;
@@ -62,6 +65,11 @@ public class DefaultJavaPluginConvention extends JavaPluginConvention implements
         testReportDirName = TestingBasePlugin.TESTS_DIR_NAME;
     }
 
+    private Provider<Integer> findRelease() {
+        JavaPluginExtension extension = project.getExtensions().findByType(JavaPluginExtension.class);
+        return extension == null ? Providers.notDefined() : extension.getRelease();
+    }
+
     @Override
     public TypeOf<?> getPublicType() {
         return typeOf(JavaPluginConvention.class);
@@ -93,7 +101,8 @@ public class DefaultJavaPluginConvention extends JavaPluginConvention implements
 
     @Override
     public JavaVersion getSourceCompatibility() {
-        return srcCompat != null ? srcCompat : JavaVersion.current();
+        Provider<Integer> release = findRelease();
+        return release.isPresent() ? JavaVersion.toVersion(release.get()) : srcCompat != null ? srcCompat : JavaVersion.current();
     }
 
     @Override
@@ -108,7 +117,8 @@ public class DefaultJavaPluginConvention extends JavaPluginConvention implements
 
     @Override
     public JavaVersion getTargetCompatibility() {
-        return targetCompat != null ? targetCompat : getSourceCompatibility();
+        Provider<Integer> release = findRelease();
+        return release.isPresent() ? JavaVersion.toVersion(release.get()) : targetCompat != null ? targetCompat : getSourceCompatibility();
     }
 
     @Override
